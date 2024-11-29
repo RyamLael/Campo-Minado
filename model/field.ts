@@ -20,7 +20,7 @@ class Field {
 
         for (let i = 0; i < nRows; i++) {
             for (let j = 0; j < nColumns; j++) {
-                cells[i][j] = new Cell(null);
+                cells[i][j] = new Cell(null, [i, j]);
             }
         }
         return cells;
@@ -28,17 +28,48 @@ class Field {
 
     private populateBombs(nBombs: number, cells: Cell[][]): void {
 
-        for(let i = 0; i < nBombs; i++) {
+        for (let i = 0; i < nBombs; i++) {
 
             let randomPosX = Math.floor(Math.random() * this.nRows);
             let randomPosY = Math.floor(Math.random() * this.nColumns);
 
-            if(cells[randomPosX][randomPosY].getContent === null){
+            if (cells[randomPosX][randomPosY].getContent === null) {
                 cells[randomPosX][randomPosY].setContent(new Bomb());
             }
-            else{
+            else {
                 i--;
             }
         }
     }
+
+    private countBombsAround(cell: Cell): number {
+        /*
+        Essa função é um pouco difícil de entender, mas basicamente criei um vetor de direções ao redor da célula (a esquerda da célula é [-1, 0], por exemplo) e 
+        incremento cada posição dele nas coordenadas da célula passada no parâmetro. Sendo assim, verifico em cada uma dessas coordenadas se há uma bomba ou não.
+        */
+        let bomsCounter = 0;
+        const aroundDirections = [
+            [-1, 1], [0, 1], [1, 1],
+            [-1, 0],         [1, 0],
+            [-1,-1], [0,-1], [1, -1]
+        ]
+
+        for (let [xAroundDir, yAroundDir] of aroundDirections) {
+            let xIndex = xAroundDir + cell.getPosX();
+            let yIndex = yAroundDir + cell.getPosY();
+
+            if (this.isValidPosition(xIndex, yIndex)) {
+                if (this.cells[xIndex][yIndex].hasbomb()) {
+                    bomsCounter++;
+                }
+            }
+        }
+        return bomsCounter;
+    }
+
+    private isValidPosition(xIndex: number, yIndex: number): boolean {
+        //Verifica se os índices estão dentro dos limites de tamanho da matriz de células
+        return xIndex >= 0 && xIndex < this.nColumns && yIndex >= 0 && yIndex < this.nRows;
+    }
+
 }
